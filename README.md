@@ -155,3 +155,11 @@ The split matters. Everything in the always-loaded file competes for attention w
 user's actual request, so detail lives in skills and gets pulled in when relevant. The
 checker exists because instructions alone are a suggestion: an agent that skips the README
 step is caught by CI rather than by a reader three weeks later.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+Projects you build from this template are yours. Nothing here asks you to keep the
+licence, the attribution or any of these files once the template has been adapted.
+
