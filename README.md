@@ -102,6 +102,7 @@ bash scripts/bootstrap.sh
 | `templates/env.example` | Copy to `.env.example` when the project reads environment variables. |
 | `scripts/readme_check.py` | The checker. Standard library only. |
 | `scripts/bootstrap.sh` | Creates `.venv`, installs, prints the commands the README should show. |
+| `ruff.toml` | Lint and format settings, at 100 columns to match `.editorconfig`. |
 | `docs/spec.md`, `docs/decisions/` | The spec, and numbered decision records. |
 | `TASKS.md` | The working list, with the reasoning behind each item. |
 
@@ -120,8 +121,23 @@ python3 scripts/readme_check.py     # this README passes its own checker
 bash -n scripts/bootstrap.sh        # syntax check the shell script
 ```
 
+Lint and format, using the version CI pins:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install ruff==0.16.4
+.venv/bin/ruff check .
+.venv/bin/ruff format --check .
+```
+
 CI runs the checker against every `README.md` in the repo except the templates, plus ruff
-and pytest when there is anything for them to do.
+and pytest when there is anything for them to do. Ruff is pinned to the same version in
+[.github/workflows/checks.yml](.github/workflows/checks.yml), because an unpinned formatter
+turns someone else's release into a red build on a commit that changed nothing.
+
+Ruff is configured in [ruff.toml](ruff.toml) rather than `pyproject.toml`. That is not a
+style preference: a `pyproject.toml` at the root would make `readme_check.py` classify this
+repo as a Python project and then fail its own README for having no venv in the Quickstart.
 
 Changing the contract means changing three files together, or the checker and the docs
 drift apart: `scripts/readme_check.py`, `templates/README.template.md`, and the contract

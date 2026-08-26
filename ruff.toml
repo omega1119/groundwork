@@ -1,0 +1,8 @@
+# Kept in ruff.toml rather than pyproject.toml on purpose: a pyproject.toml at the root
+# would make readme_check.py treat this repo as a Python project and demand a venv in its
+# own Quickstart.
+line-length = 100
+target-version = "py39"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

@@ -77,9 +77,7 @@ def check(path: Path) -> list[str]:
     if not body[0].startswith("# "):
         problems.append("line 1 must be the project name as an H1, for example '# Thing'")
     elif len(body) < 2 or body[1].startswith("#"):
-        problems.append(
-            "the H1 must be followed by a one-paragraph summary before the first '##'"
-        )
+        problems.append("the H1 must be followed by a one-paragraph summary before the first '##'")
 
     found = [m.group(1) for _, line in prose if (m := HEADING.match(line))]
     missing = [s for s in REQUIRED if s not in found]
@@ -89,9 +87,7 @@ def check(path: Path) -> list[str]:
     present = [s for s in REQUIRED if s in found]
     order = [found.index(s) for s in present]
     if order != sorted(order):
-        problems.append(
-            "required sections are out of order, expected: " + " then ".join(REQUIRED)
-        )
+        problems.append("required sections are out of order, expected: " + " then ".join(REQUIRED))
 
     for n, line in prose:
         for match in PLACEHOLDER.finditer(line):
@@ -99,9 +95,7 @@ def check(path: Path) -> list[str]:
                 problems.append(f"line {n}: unfilled placeholder <{match.group(1)}>")
         stripped = line.lstrip("-* ").strip()
         if stripped.startswith("<") and ">" not in stripped and is_placeholder(stripped[1:]):
-            problems.append(
-                f"line {n}: unfilled placeholder block starting '{stripped[:40]}...'"
-            )
+            problems.append(f"line {n}: unfilled placeholder block starting '{stripped[:40]}...'")
         if BRACES.search(line):
             problems.append(f"line {n}: unfilled placeholder {BRACES.search(line).group(0)}")
         if match := LEFTOVERS.search(line):
@@ -149,9 +143,7 @@ def check_quickstart(path: Path, block: str) -> list[str]:
     ) or any(root.glob("*.py"))
     if has_python:
         if "venv" not in block and "uv " not in block and "conda" not in block:
-            problems.append(
-                "Quickstart never creates an environment, but this is a Python project"
-            )
+            problems.append("Quickstart never creates an environment, but this is a Python project")
         if "Activate.ps1" not in block and "uv " not in block:
             problems.append("Quickstart has no Windows PowerShell activation line")
         if "requirements.txt" in block and not (root / "requirements.txt").exists():
