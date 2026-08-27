@@ -41,7 +41,7 @@ reader blames themselves. Grep or run before you write.
 | Path | What it is |
 |---|---|
 | `.github/copilot-instructions.md` | This file. Always loaded. Keep it short. |
-| `.github/skills/` | Loadable procedures: bootstrapping a project, writing the README, writing a spec. |
+| `.github/skills/` | Loadable procedures: bootstrapping a project, writing the README, writing a spec. Third-party skills are vendored here, pinned by `vendored.json`. |
 | `.github/instructions/` | Auto-applied rules, scoped by `applyTo` glob. |
 | `.github/prompts/` | Slash commands: `/new-project`, `/update-readme`, `/write-spec`, `/new-infra`. |
 | `.github/agents/` | Custom agent definitions. |
@@ -63,6 +63,25 @@ Load these rather than improvising. Each is in `.github/skills/<name>/SKILL.md`.
 - **`iac-templating`**: writing or reviewing Bicep or Terraform. Owns the `infra/` layout,
   Azure Verified Module reuse, and the build/lint/what-if gate.
 
+### Vendored skills
+
+These come from other repositories, pinned to a commit in `.github/skills/vendored.json`
+and fetched by `scripts/vendor_skills.py`. Each has a `PROVENANCE.md` and the upstream
+licence. **Never edit them by hand**, a refresh overwrites the directory. To change how
+they behave, add a rule under `.github/instructions/`, which wins.
+
+- **`design-taste-frontend`**: landing pages, portfolios and redesigns that should not
+  look templated. From `Leonxlnx/taste-skill`. Big file, roughly 87 KB, so it costs real
+  context when it loads. Its Tailwind default agrees with our rule, but its design system
+  step can drift toward Material or Carbon, and `webui.instructions.md` overrides that.
+- **`swiftui-expert-skill`**: SwiftUI state management, modern APIs, concurrency, and
+  iOS 26+ Liquid Glass. From `AvdLee/SwiftUI-Agent-Skill`. Small entry point with
+  on-demand `references/`, so it is cheap to load.
+
+```bash
+python3 scripts/vendor_skills.py --check
+```
+
 ## Writing style
 
 **Never use em dashes.** Not in prose, code comments, docstrings, commit messages,
@@ -70,6 +89,11 @@ documentation or UI copy. Use a comma, a colon, a full stop, parentheses, or the
 conjunction the dash was hiding. A blind swap to " - " is worse than the dash. En dashes
 in numeric ranges (`1k–4.9k`) and hyphenated compounds are fine. `readme_check.py` fails
 the build on em dashes, so this is enforced, not advisory.
+
+It also fails on invisible characters: zero width spaces, non-breaking spaces, bidi
+controls and Unicode tag characters. These arrive from web paste and from tools that hide
+markers between letters. A zero width space inside a command block gives the reader
+"command not found" with nothing visible to blame.
 
 Comments state what the code cannot show on its own, in one line. Do not restate the next
 line and do not explain the change to a reviewer.
@@ -94,3 +118,6 @@ performant". No marketing adjectives in a README.
   dependency tree in six months.
 - One project per repo unless there is a reason. If there are several, each subfolder gets
   its own README and the root README links to them with a status column.
+- **Web UI is Tailwind.** Check the installed major version in `package.json` before
+  writing a class, because v3 and v4 configure differently. See
+  `.github/instructions/webui.instructions.md`.

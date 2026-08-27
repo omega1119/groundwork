@@ -13,6 +13,18 @@ Procedures that are too long to keep loaded are in `.github/skills/<name>/SKILL.
 | `spec-first` | The request is vague, or the work is bigger than one sitting. |
 | `iac-templating` | Writing or reviewing Bicep or Terraform under `infra/`. |
 
+Two more are vendored from other repositories, pinned in `.github/skills/vendored.json`.
+They carry a `PROVENANCE.md` and the upstream MIT licence. Do not edit them by hand.
+
+| Skill | Load it when | Upstream |
+|---|---|---|
+| `design-taste-frontend` | Building a landing page, portfolio or redesign. | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
+| `swiftui-expert-skill` | Writing or reviewing SwiftUI. | [AvdLee/SwiftUI-Agent-Skill](https://github.com/AvdLee/SwiftUI-Agent-Skill) |
+
+```bash
+python3 scripts/vendor_skills.py --check
+```
+
 Short version, if you read nothing else:
 
 1. Write `docs/spec.md` before the code when the task is bigger than a single file.

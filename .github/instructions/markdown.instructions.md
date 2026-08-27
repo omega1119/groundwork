@@ -7,6 +7,9 @@ applyTo: "**/*.md"
 - **No em dashes.** Comma, colon, full stop, parentheses, or the conjunction the dash was
   hiding. A blind swap to " - " is worse than the dash. En dashes in numeric ranges
   (`1k–4.9k`) and hyphenated compounds are fine. `scripts/readme_check.py` enforces this.
+- **No invisible characters.** Zero width spaces, non-breaking spaces, soft hyphens, bidi
+  controls and Unicode tag characters all survive a paste and break commands silently.
+  `readme_check.py` reports them with a line and column so they can be found.
 - One `#` heading per file, at the top. Then `##` sections in a sensible order.
 - Language on every fenced block: `bash`, `python`, `powershell`, `json`, `mermaid`.
 - Commands are copy-pasteable. No `$` prompt prefix, because it breaks copy and paste.

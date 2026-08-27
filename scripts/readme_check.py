@@ -37,6 +37,57 @@ HTML_TAG = re.compile(
     re.IGNORECASE,
 )
 
+# Characters that survive a copy-paste, render as nothing or as an ordinary space, and
+# change what the text means. They arrive from web paste, word processors, and from tools
+# that hide provenance markers in the gaps between letters. A zero width space inside a
+# command block gives the reader "command not found" with no visible cause.
+INVISIBLE = {
+    "\u00a0": "non-breaking space",
+    "\u00ad": "soft hyphen",
+    "\u180e": "Mongolian vowel separator",
+    "\u2000": "en quad",
+    "\u2001": "em quad",
+    "\u2002": "en space",
+    "\u2003": "em space",
+    "\u2004": "three-per-em space",
+    "\u2005": "four-per-em space",
+    "\u2006": "six-per-em space",
+    "\u2007": "figure space",
+    "\u2008": "punctuation space",
+    "\u2009": "thin space",
+    "\u200a": "hair space",
+    "\u200b": "zero width space",
+    "\u200c": "zero width non-joiner",
+    "\u200d": "zero width joiner",
+    "\u200e": "left-to-right mark",
+    "\u200f": "right-to-left mark",
+    "\u202a": "left-to-right embedding",
+    "\u202b": "right-to-left embedding",
+    "\u202c": "pop directional formatting",
+    "\u202d": "left-to-right override",
+    "\u202e": "right-to-left override",
+    "\u202f": "narrow non-breaking space",
+    "\u205f": "medium mathematical space",
+    "\u2060": "word joiner",
+    "\u2066": "left-to-right isolate",
+    "\u2067": "right-to-left isolate",
+    "\u2068": "first strong isolate",
+    "\u2069": "pop directional isolate",
+    "\u3000": "ideographic space",
+    "\ufeff": "byte order mark",
+}
+
+
+def invisible_name(ch: str) -> str | None:
+    """Return a human name if this character is invisible or a disguised space."""
+    if ch in INVISIBLE:
+        return INVISIBLE[ch]
+    # Unicode tag characters. They have no rendering at all and exist to smuggle a payload
+    # through anything that treats text as opaque.
+    if 0xE0000 <= ord(ch) <= 0xE007F:
+        return "Unicode tag character"
+    return None
+
 
 def split_fences(text: str) -> tuple[list[tuple[int, str]], list[tuple[int, str]]]:
     """Return (prose_lines, all_lines) as (line_number, line) pairs.
@@ -104,6 +155,14 @@ def check(path: Path) -> list[str]:
     for n, line in every:
         if "\u2014" in line:
             problems.append(f"line {n}: em dash. Use a comma, colon, full stop or parentheses")
+        seen: set[str] = set()
+        for col, ch in enumerate(line, start=1):
+            name = invisible_name(ch)
+            if name and name not in seen:
+                seen.add(name)
+                problems.append(
+                    f"line {n} col {col}: {name} (U+{ord(ch):04X}). Delete it, or use a plain space"
+                )
 
     quickstart = section_body(lines, "Quickstart")
     if quickstart is None:
