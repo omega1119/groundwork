@@ -43,7 +43,7 @@ reader blames themselves. Grep or run before you write.
 | `.github/copilot-instructions.md` | This file. Always loaded. Keep it short. |
 | `.github/skills/` | Loadable procedures: bootstrapping a project, writing the README, writing a spec. |
 | `.github/instructions/` | Auto-applied rules, scoped by `applyTo` glob. |
-| `.github/prompts/` | Slash commands: `/new-project`, `/update-readme`, `/write-spec`. |
+| `.github/prompts/` | Slash commands: `/new-project`, `/update-readme`, `/write-spec`, `/new-infra`. |
 | `.github/agents/` | Custom agent definitions. |
 | `docs/spec.md` | What is being built and why. Written before the code. |
 | `docs/decisions/` | Short ADRs for choices a future reader would otherwise reverse by accident. |
@@ -60,6 +60,8 @@ Load these rather than improvising. Each is in `.github/skills/<name>/SKILL.md`.
 - **`readme-writer`**: any time the README is created or the setup/run story changes.
   Owns the README contract and the per-stack quickstart blocks.
 - **`spec-first`**: turning a vague request into `docs/spec.md` before writing code.
+- **`iac-templating`**: writing or reviewing Bicep or Terraform. Owns the `infra/` layout,
+  Azure Verified Module reuse, and the build/lint/what-if gate.
 
 ## Writing style
 

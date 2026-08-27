@@ -10,6 +10,7 @@ The environment already carries deep Azure skills. Use them rather than improvis
 | Need | Skill |
 |---|---|
 | Scaffold infra, `azure.yaml`, Bicep or Terraform | `azure-prepare` |
+| `infra/` layout, module reuse, the build/lint/what-if gate | `iac-templating` |
 | Pre-deployment checks, RBAC, what-if | `azure-validate` |
 | Run the deploy, recover from errors | `azure-deploy` |
 | Pick the right role, least privilege | `azure-rbac` |

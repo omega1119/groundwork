@@ -11,6 +11,7 @@ Procedures that are too long to keep loaded are in `.github/skills/<name>/SKILL.
 | `project-bootstrap` | Starting a new project or adding a new component. |
 | `readme-writer` | Creating a README, or changing how the project is set up or run. |
 | `spec-first` | The request is vague, or the work is bigger than one sitting. |
+| `iac-templating` | Writing or reviewing Bicep or Terraform under `infra/`. |
 
 Short version, if you read nothing else:
 

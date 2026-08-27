@@ -1,6 +1,6 @@
 ---
 name: readme-writer
-description: Use when creating or updating a README, or whenever a change affects how a project is installed, configured, run, tested or deployed. Owns the README contract, the per-stack quickstart blocks (Python venv, notebooks, Node, static site, Azure web app, Docker) and the rule that every documented command must be executed before it is written down.
+description: Use when creating or updating a README, or whenever a change affects how a project is installed, configured, run, tested or deployed. Owns the README contract, the per-stack quickstart blocks (Python venv, notebooks, Node, static site, Azure web app, Docker, infrastructure as code) and the rule that every documented command must be executed before it is written down.
 ---
 
 # README writer
@@ -105,6 +105,7 @@ Copy from `templates/quickstart/`:
 | `node-web.md` | Node, Vite, Next, anything with `package.json`. |
 | `docker.md` | Anything containerised. |
 | `azure-webapp.md` | Deployed to Azure App Service or Container Apps. |
+| `iac.md` | An `infra/` folder in Bicep or Terraform. |
 
 ## Failure modes seen in the wild
 
