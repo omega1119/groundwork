@@ -9,7 +9,7 @@ The thing it actually fixes: agents write good code and then describe how to run
 memory. Groundwork makes the setup instructions a checked artefact. Every command in a
 README has to have been executed, and `scripts/readme_check.py` fails the build on
 placeholders, missing sections, an install line pointing at a file that does not exist, a
-notebook with no kernel step, and em dashes.
+notebook with no kernel step, em dashes, and invisible Unicode characters.
 
 ## Requirements
 
@@ -24,7 +24,15 @@ before any environment exists.
 
 ## Quickstart
 
-Use this repo as a GitHub template, or copy it:
+This repo is registered as a GitHub template, so with the GitHub CLI:
+
+```bash
+gh repo create my-project --template omega1119/groundwork --private --clone
+cd my-project
+code .
+```
+
+Without `gh`, clone it and start the history over:
 
 ```bash
 git clone https://github.com/omega1119/groundwork.git my-project
@@ -50,13 +58,14 @@ Success looks like `ok   README.md`. Anything else lists the exact lines to fix.
 
 ## Usage
 
-Three slash commands, defined in `.github/prompts/`:
+Four slash commands, defined in `.github/prompts/`:
 
 | Command | What it does |
 |---|---|
 | `/new-project` | Classifies the request, scaffolds, sets up the environment, runs it, writes and verifies the README. |
 | `/update-readme` | Re-derives the README from the code, runs every documented command, reports what had drifted. |
 | `/write-spec` | Turns a vague idea into `docs/spec.md` before any code exists. |
+| `/new-infra` | Scaffolds `infra/` in Bicep or Terraform, records which and why, gates on build, lint and what-if. |
 
 There is also a `shipwright` agent in `.github/agents/` that will not report a task as done
 until the README has been verified.
@@ -92,16 +101,21 @@ bash scripts/bootstrap.sh
 | `.github/skills/project-bootstrap/` | How to start anything, with a reference per track: script, notebook, static site, CLI, web app, Azure. |
 | `.github/skills/readme-writer/` | The README contract and the rule that documented commands must be run. |
 | `.github/skills/spec-first/` | Turning a vague request into a spec, and when not to bother. |
-| `.github/instructions/` | Auto-applied rules scoped by glob: Python, Markdown, notebooks, shell. |
-| `.github/prompts/` | The three slash commands. |
+| `.github/skills/iac-templating/` | Bicep or Terraform under `infra/`, Azure Verified Modules first, with a reference for each language. |
+| `.github/skills/design-taste-frontend/` | Vendored. Landing pages and redesigns that do not look templated. |
+| `.github/skills/swiftui-expert-skill/` | Vendored. SwiftUI state, performance and modern API migration. |
+| `.github/skills/vendored.json` | Pins each vendored skill to an upstream commit. Never hand-edit a vendored directory. |
+| `.github/instructions/` | Auto-applied rules scoped by glob: Python, Markdown, notebooks, shell, web UI. |
+| `.github/prompts/` | The four slash commands. |
 | `.github/agents/shipwright.agent.md` | An agent that refuses to finish on unverified docs. |
 | `.github/workflows/checks.yml` | CI: the README contract, ruff, pytest. |
 | `templates/README.template.md` | The section order every README follows. |
 | `templates/spec.template.md` | Problem, success criteria, non-goals, rejected alternatives. |
-| `templates/quickstart/` | Copy-paste setup blocks: Python venv, notebook, static site, Node, Docker, Azure. |
+| `templates/quickstart/` | Copy-paste setup blocks: Python venv, notebook, static site, Node, Docker, Azure, infrastructure. |
 | `templates/env.example` | Copy to `.env.example` when the project reads environment variables. |
 | `scripts/readme_check.py` | The checker. Standard library only. |
 | `scripts/bootstrap.sh` | Creates `.venv`, installs, prints the commands the README should show. |
+| `scripts/vendor_skills.py` | Refetches the vendored skills at their pinned commits. Standard library only. |
 | `ruff.toml` | Lint and format settings, at 100 columns to match `.editorconfig`. |
 | `docs/spec.md`, `docs/decisions/` | The spec, and numbered decision records. |
 | `TASKS.md` | The working list, with the reasoning behind each item. |
@@ -117,9 +131,20 @@ code actually reads.
 ## Development
 
 ```bash
-python3 scripts/readme_check.py     # this README passes its own checker
-bash -n scripts/bootstrap.sh        # syntax check the shell script
+python3 scripts/readme_check.py            # this README passes its own checker
+bash -n scripts/bootstrap.sh               # syntax check the shell script
+python3 scripts/vendor_skills.py --check   # vendored skills match their pinned commits
 ```
+
+Two skills come from other repositories, pinned by commit in
+[.github/skills/vendored.json](.github/skills/vendored.json) and fetched by
+`scripts/vendor_skills.py`. Each carries a `PROVENANCE.md` and the upstream MIT licence as
+`LICENSE.upstream`. Do not edit those directories by hand, a refresh overwrites them. To
+change how a vendored skill behaves, add a rule under `.github/instructions/`, which wins.
+That is what
+[.github/instructions/webui.instructions.md](.github/instructions/webui.instructions.md)
+does: it holds the frontend skill to Tailwind rather than letting it reach for Material or
+Carbon.
 
 Lint and format, using the version CI pins:
 
