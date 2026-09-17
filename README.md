@@ -103,7 +103,7 @@ bash scripts/bootstrap.sh
 | `.github/skills/spec-first/` | Turning a vague request into a spec, and when not to bother. |
 | `.github/skills/iac-templating/` | Bicep or Terraform under `infra/`, Azure Verified Modules first, with a reference for each language. |
 | `.github/skills/design-taste-frontend/` | Vendored. Landing pages and redesigns that do not look templated. |
-| `.github/skills/swiftui-expert-skill/` | Vendored. SwiftUI state, performance and modern API migration. |
+| `.github/skills/swiftui-expert-skill/` | Vendored. SwiftUI state, performance and iOS 26/27 API migration. |
 | `.github/skills/vendored.json` | Pins each vendored skill to an upstream commit. Never hand-edit a vendored directory. |
 | `.github/instructions/` | Auto-applied rules scoped by glob: Python, Markdown, notebooks, shell, web UI. |
 | `.github/prompts/` | The four slash commands. |

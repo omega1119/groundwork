@@ -155,7 +155,7 @@ Two skills come from other people's repositories, pinned to a commit in
 | Skill | Upstream | Notes |
 |---|---|---|
 | `design-taste-frontend` | `Leonxlnx/taste-skill` | Landing pages and redesigns that do not look templated. Roughly 87 KB, so it costs real context when it loads. |
-| `swiftui-expert-skill` | `AvdLee/SwiftUI-Agent-Skill` | Small entry point with on-demand `references/`, so it is cheap. |
+| `swiftui-expert-skill` | `AvdLee/SwiftUI-Agent-Skill` | Covers the iOS 26 and 27 APIs. 10 KB entry point with 32 on-demand files under `references/`, so it is cheap. |
 
 Each directory carries a `PROVENANCE.md` saying where it came from and a `LICENSE.upstream`
 with the original copyright notice. **Both are required, not courtesy:** MIT, BSD and

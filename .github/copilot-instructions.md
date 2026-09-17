@@ -74,9 +74,10 @@ they behave, add a rule under `.github/instructions/`, which wins.
   look templated. From `Leonxlnx/taste-skill`. Big file, roughly 87 KB, so it costs real
   context when it loads. Its Tailwind default agrees with our rule, but its design system
   step can drift toward Material or Carbon, and `webui.instructions.md` overrides that.
-- **`swiftui-expert-skill`**: SwiftUI state management, modern APIs, concurrency, and
-  iOS 26+ Liquid Glass. From `AvdLee/SwiftUI-Agent-Skill`. Small entry point with
-  on-demand `references/`, so it is cheap to load.
+- **`swiftui-expert-skill`**: SwiftUI state and `@Observable` data flow, view
+  composition, performance, and migration onto the iOS 26 and 27 APIs, including Liquid
+  Glass, toolbars, Document and WebKit integration. From `AvdLee/SwiftUI-Agent-Skill`.
+  10 KB entry point with 32 on-demand files under `references/`, so it is cheap to load.
 
 ```bash
 python3 scripts/vendor_skills.py --check

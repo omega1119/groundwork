@@ -7,11 +7,11 @@ behaviour, add a rule under `.github/instructions/`, which takes precedence.
 | Field | Value |
 |---|---|
 | Upstream | https://github.com/AvdLee/SwiftUI-Agent-Skill |
-| Commit | `4c6a97d15aa5e023538c3cb06b5192f241dd451d` |
+| Commit | `00a94e15f30397a4c79b6dee78327f87f828d75e` |
 | Source path | `skills/swiftui-expert-skill` |
 | Licence | MIT, see `LICENSE.upstream` |
-| Vendored on | 2026-08-27 |
-| Files | 28, 289 KB |
+| Vendored on | 2026-09-17 |
+| Files | 34, 349 KB |
 
 ## Refresh
 
