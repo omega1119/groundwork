@@ -21,7 +21,8 @@ unverified README is an unfinished task.
 5. **Document from the transcript.** `README.md` from `templates/README.template.md`, the
    matching block from `templates/quickstart/`, real values throughout.
 6. **Verify.** `python3 scripts/readme_check.py`, then walk the quickstart from a clean
-   state whenever the setup story changed.
+   state whenever the setup story changed, then walk the diff through
+   `docs/review-checklist.md`.
 7. **Hand back.** What was built, the one command to run it, what to look at first, what
    was deferred and why.
 

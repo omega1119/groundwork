@@ -10,7 +10,8 @@
 
 - [ ] The README reflects this change (setup, run, configuration, deployment).
 - [ ] Every command I documented, I ran.
-- [ ] `python3 scripts/readme_check.py` passes.
+- [ ] `python3 scripts/readme_check.py` and `python3 scripts/readme_check.py --text-only` pass.
+- [ ] I walked the diff through `docs/review-checklist.md`.
 - [ ] New dependencies are pinned and listed in the README's Requirements.
 - [ ] New environment variables are in `.env.example` and in the Configuration table.
 - [ ] No secrets, credentials or real personal data in the diff.

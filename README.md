@@ -96,8 +96,9 @@ bash scripts/bootstrap.sh
 
 | Path | What it is |
 |---|---|
-| `.github/copilot-instructions.md` | Always loaded. The definition of done, the layout, the conventions that bite. |
+| `.github/copilot-instructions.md` | Always loaded. The definition of done, how to build, the layout, the conventions that bite. |
 | `AGENTS.md` | The same pointer for agents that do not read Copilot's file. |
+| `CLAUDE.md` | Imports `AGENTS.md` and the Copilot file, because Claude Code reads neither directly. |
 | `.github/skills/project-bootstrap/` | How to start anything, with a reference per track: script, notebook, static site, CLI, web app, Azure. |
 | `.github/skills/readme-writer/` | The README contract and the rule that documented commands must be run. |
 | `.github/skills/spec-first/` | Turning a vague request into a spec, and when not to bother. |
@@ -118,6 +119,7 @@ bash scripts/bootstrap.sh
 | `scripts/vendor_skills.py` | Refetches the vendored skills at their pinned commits. Standard library only. |
 | `ruff.toml` | Lint and format settings, at 100 columns to match `.editorconfig`. |
 | `docs/spec.md`, `docs/decisions/` | The spec, and numbered decision records. |
+| `docs/review-checklist.md` | Questions to put to a diff before calling it done. |
 | `TASKS.md` | The working list, with the reasoning behind each item. |
 
 ## Configuration
@@ -131,9 +133,10 @@ code actually reads.
 ## Development
 
 ```bash
-python3 scripts/readme_check.py            # this README passes its own checker
-bash -n scripts/bootstrap.sh               # syntax check the shell script
-python3 scripts/vendor_skills.py --check   # vendored skills match their pinned commits
+python3 scripts/readme_check.py               # this README passes its own checker
+python3 scripts/readme_check.py --text-only   # em dashes, hidden characters, all .md
+bash -n scripts/bootstrap.sh                  # syntax check the shell script
+python3 scripts/vendor_skills.py --check      # vendored skills match their pinned commits
 ```
 
 Two skills come from other repositories, pinned by commit in
@@ -155,10 +158,12 @@ python3 -m venv .venv
 .venv/bin/ruff format --check .
 ```
 
-CI runs the checker against every `README.md` in the repo except the templates, plus ruff
-and pytest when there is anything for them to do. Ruff is pinned to the same version in
-[.github/workflows/checks.yml](.github/workflows/checks.yml), because an unpinned formatter
-turns someone else's release into a red build on a commit that changed nothing.
+CI runs the checker against every `README.md` in the repo except the templates, then runs
+`--text-only` over every markdown file except the vendored skills (which follow upstream
+style), plus ruff and pytest when there is anything for them to do. Ruff is pinned to the
+same version in [.github/workflows/checks.yml](.github/workflows/checks.yml), because an
+unpinned formatter turns someone else's release into a red build on a commit that changed
+nothing.
 
 Ruff is configured in [ruff.toml](ruff.toml) rather than `pyproject.toml`. That is not a
 style preference: a `pyproject.toml` at the root would make `readme_check.py` classify this
@@ -170,9 +175,10 @@ table in `.github/skills/readme-writer/SKILL.md`.
 
 ## Adapting it for a real project
 
-1. Rewrite `.github/copilot-instructions.md` for the project. Keep the writing style and
-   definition of done sections, replace everything else. Keep it short, it is loaded on
-   every request, and a file nobody reads to the end is worse than a shorter one.
+1. Rewrite `.github/copilot-instructions.md` for the project. Keep the writing style,
+   definition of done and "How to build it" sections, replace everything else. Keep it
+   short, it is loaded on every request, and a file nobody reads to the end is worse than
+   a shorter one.
 2. Replace this README using `templates/README.template.md`.
 3. Write `docs/spec.md`, or note in one line why the project does not need one.
 4. Delete the tracks in `.github/skills/project-bootstrap/references/` that do not apply.

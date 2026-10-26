@@ -21,7 +21,7 @@ to understand.
 
 | Kind | Where | When it loads | Cost |
 |---|---|---|---|
-| Always-on instructions | `.github/copilot-instructions.md`, `AGENTS.md` | Every single request | Paid on every message, so it stays short |
+| Always-on instructions | `.github/copilot-instructions.md`, `AGENTS.md`, `CLAUDE.md` | Every single request | Paid on every message, so it stays short |
 | Scoped instructions | `.github/instructions/*.instructions.md` | Automatically, when a file matching its `applyTo` glob is touched | Only when relevant files are in play |
 | Skills | `.github/skills/*/SKILL.md` | On demand, when the agent judges the description matches the task | Only when the task matches |
 | Prompts | `.github/prompts/*.prompt.md` | Only when you type the slash command | Only when you ask |
@@ -46,7 +46,8 @@ procedures sit in skills that get pulled in when they are relevant.
 | File | What it is | When you touch it |
 |---|---|---|
 | [README.md](../README.md) | The repo's own README. Also a worked example: it passes its own checker. | Replace it when you adapt this template for a real project. |
-| [AGENTS.md](../AGENTS.md) | The same pointer as `copilot-instructions.md`, for agents that do not read Copilot's file (Cursor, Claude Code, Codex and friends). It is deliberately a short redirect, not a copy, so the two cannot drift apart. | Rarely. |
+| [AGENTS.md](../AGENTS.md) | The same pointer as `copilot-instructions.md`, for agents that do not read Copilot's file (Cursor, Claude Code, Codex and friends). It is deliberately a short redirect, not a copy, so the two cannot drift apart. It also tells those tools that the prompt and agent files are readable procedures. | Rarely. |
+| [CLAUDE.md](../CLAUDE.md) | Two `@` imports, `AGENTS.md` and `copilot-instructions.md`. Claude Code reads `CLAUDE.md` and only falls back to `AGENTS.md` when no `CLAUDE.md` exists, so without this it would see neither. | Never. |
 | [TASKS.md](../TASKS.md) | The working task list, split into Now, Next, Deferred and Done. Carries **the reasoning**, not just checkboxes, because the reason a task exists is the part that gets lost. Anything discovered and deferred lands here in the same turn, with why. | Constantly, while building. |
 | [LICENSE](../LICENSE) | MIT. | Never. |
 | [ruff.toml](../ruff.toml) | Python lint and format settings, at 100 columns. | When lint rules change. |
@@ -68,6 +69,10 @@ Copilot request in this workspace. It holds:
 - **The one rule that matters.** A project is not finished until a stranger can clone it
   and run it from the README alone.
 - **The definition of done**, as six numbered checks.
+- **How to build it**: skeleton first, nothing nobody asked for, extract on the third copy,
+  fail loudly, delete what you made dead, long names for parameters, the human owns the
+  architecture, review against the checklist. The sources, IBM practice from the 1970s
+  among them, are in [ADR 0002](decisions/0002-engineering-heuristics.md).
 - **The layout table**, so the agent knows where things go.
 - **The writing style rules**, including the no em dashes rule.
 - **"Conventions that bite"**, a list of specific traps: always a `.venv` in the project
@@ -187,8 +192,9 @@ enforced by the agent rather than remembered by you.
 
 [.github/workflows/checks.yml](../.github/workflows/checks.yml) runs on push to `main`, on
 pull requests, and on manual dispatch. Two jobs: **README contract**, which checks every
-`README.md` in the repo except the templates, and **Python**, which runs ruff (pinned to
-`0.16.4`) and pytest when there is anything to run.
+`README.md` in the repo except the templates and then runs `--text-only` over every markdown
+file except the vendored skills, and **Python**, which runs ruff (pinned to `0.16.4`) and
+pytest when there is anything to run.
 
 The README job counts the files it found and **fails if the count is zero**, because a
 green check that inspected nothing is worse than no check at all.
@@ -202,7 +208,8 @@ documented, does the checker pass, are new dependencies pinned.
 | Path | What it is |
 |---|---|
 | [docs/spec.md](spec.md) | What is being built and why. Currently a placeholder that explains itself. Replace it using `templates/spec.template.md` or the `/write-spec` command. |
-| [docs/decisions/](decisions/) | Numbered architecture decision records. [0001](decisions/0001-record-decisions.md) is the one that establishes the practice. |
+| [docs/decisions/](decisions/) | Numbered architecture decision records. [0001](decisions/0001-record-decisions.md) is the one that establishes the practice. [0002](decisions/0002-engineering-heuristics.md) records where the "How to build it" rules came from. |
+| [docs/review-checklist.md](review-checklist.md) | Questions to put to a diff before calling it done, in the style of a Fagan inspection: real defect types only, a reader who is not the author, and a line added whenever a defect slips through. |
 | [docs/demo-infra.md](demo-infra.md) | A walkthrough script for demonstrating the infrastructure workflow. |
 | This file | The guide you are reading. |
 
@@ -278,6 +285,18 @@ Exit code 0 for pass, 1 for fail. It reports:
 Success is one line per file: `ok   README.md`. Failure lists the specific problem and line
 number.
 
+The last two rules apply to every file, not only READMEs, so they have a mode of their own:
+
+```bash
+python3 scripts/readme_check.py --text-only           # every .md except vendored skills
+python3 scripts/readme_check.py --text-only AGENTS.md # or named files
+```
+
+With no file arguments it finds every markdown file itself and skips `.venv/`,
+`node_modules/` and the vendored skill directories listed in `.github/skills/vendored.json`.
+Vendored skills are skipped because they follow their upstream's style, and the frontend
+one uses em dashes.
+
 **If you change the contract, change three files together** or the checker and the docs
 drift apart: `scripts/readme_check.py`, `templates/README.template.md`, and the contract
 table in `.github/skills/readme-writer/SKILL.md`.
@@ -316,8 +335,9 @@ Then in Copilot Chat, in this order:
 
 ### Adapting the template for a real project
 
-1. Rewrite `.github/copilot-instructions.md` for the project. Keep the writing style and
-   definition of done sections, replace everything else, keep it short.
+1. Rewrite `.github/copilot-instructions.md` for the project. Keep the writing style,
+   definition of done and "How to build it" sections, replace everything else, keep it
+   short.
 2. Replace `README.md` using `templates/README.template.md`.
 3. Write `docs/spec.md`, or note in one line why the project does not need one.
 4. Delete the `project-bootstrap/references/` tracks that do not apply, and delete
@@ -331,9 +351,10 @@ template was cloned and never adapted. That is the signal to stop and do step 1.
 ## Checking your own changes
 
 ```bash
-python3 scripts/readme_check.py            # the README contract
-bash -n scripts/bootstrap.sh               # syntax check the shell script
-python3 scripts/vendor_skills.py --check   # vendored skills match their pinned commits
+python3 scripts/readme_check.py               # the README contract
+python3 scripts/readme_check.py --text-only   # em dashes, hidden characters, all .md
+bash -n scripts/bootstrap.sh                  # syntax check the shell script
+python3 scripts/vendor_skills.py --check      # vendored skills match their pinned commits
 ```
 
 Lint and format with the version CI pins, so a new ruff release cannot turn someone else's

@@ -4,6 +4,8 @@
 Usage:
     python3 scripts/readme_check.py                 # checks ./README.md
     python3 scripts/readme_check.py path/to/README.md ...
+    python3 scripts/readme_check.py --text-only     # em dashes and invisible characters only,
+                                                    # in every non-vendored markdown file
 
 Exit code 0 if every file passes, 1 otherwise. Runs on the standard library alone so it
 works before any environment has been set up.
@@ -11,6 +13,7 @@ works before any environment has been set up.
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -152,17 +155,7 @@ def check(path: Path) -> list[str]:
         if match := LEFTOVERS.search(line):
             problems.append(f"line {n}: leftover '{match.group(0)}' from the template")
 
-    for n, line in every:
-        if "\u2014" in line:
-            problems.append(f"line {n}: em dash. Use a comma, colon, full stop or parentheses")
-        seen: set[str] = set()
-        for col, ch in enumerate(line, start=1):
-            name = invisible_name(ch)
-            if name and name not in seen:
-                seen.add(name)
-                problems.append(
-                    f"line {n} col {col}: {name} (U+{ord(ch):04X}). Delete it, or use a plain space"
-                )
+    problems.extend(check_text(every))
 
     quickstart = section_body(lines, "Quickstart")
     if quickstart is None:
@@ -173,6 +166,41 @@ def check(path: Path) -> list[str]:
         problems.extend(check_quickstart(path, "\n".join(quickstart)))
 
     return problems
+
+
+def check_text(numbered_lines: list[tuple[int, str]]) -> list[str]:
+    """The writing rules that apply to every markdown file, not only READMEs."""
+    problems: list[str] = []
+    for n, line in numbered_lines:
+        if "\u2014" in line:
+            problems.append(f"line {n}: em dash. Use a comma, colon, full stop or parentheses")
+        seen: set[str] = set()
+        for col, ch in enumerate(line, start=1):
+            name = invisible_name(ch)
+            if name and name not in seen:
+                seen.add(name)
+                problems.append(
+                    f"line {n} col {col}: {name} (U+{ord(ch):04X}). Delete it, or use a plain space"
+                )
+    return problems
+
+
+SKIP_DIRS = {".git", ".venv", "node_modules", ".ruff_cache", "__pycache__"}
+
+
+def markdown_files(root: Path) -> list[Path]:
+    """Every markdown file in the repo except vendored skills, which follow upstream style."""
+    vendored: set[Path] = set()
+    manifest = root / ".github" / "skills" / "vendored.json"
+    if manifest.exists():
+        for skill in json.loads(manifest.read_text(encoding="utf-8"))["skills"]:
+            vendored.add(root / ".github" / "skills" / skill["name"])
+    return sorted(
+        p
+        for p in root.rglob("*.md")
+        if not SKIP_DIRS.intersection(p.relative_to(root).parts)
+        and not any(p.is_relative_to(v) for v in vendored)
+    )
 
 
 def section_body(lines: list[str], name: str) -> list[str] | None:
@@ -225,7 +253,16 @@ def check_quickstart(path: Path, block: str) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
-    targets = [Path(a) for a in argv[1:]] or [Path("README.md")]
+    args = argv[1:]
+    text_only = "--text-only" in args
+    args = [a for a in args if a != "--text-only"]
+    if text_only:
+        targets = [Path(a) for a in args] or markdown_files(Path("."))
+        if not targets:
+            print("FAIL no markdown files found")
+            return 1
+    else:
+        targets = [Path(a) for a in args] or [Path("README.md")]
     failed = False
 
     for path in targets:
@@ -233,7 +270,10 @@ def main(argv: list[str]) -> int:
             print(f"FAIL {path}: does not exist")
             failed = True
             continue
-        problems = check(path)
+        if text_only:
+            problems = check_text(list(enumerate(path.read_text(encoding="utf-8").splitlines(), 1)))
+        else:
+            problems = check(path)
         if problems:
             failed = True
             print(f"FAIL {path}")
@@ -242,7 +282,9 @@ def main(argv: list[str]) -> int:
         else:
             print(f"ok   {path}")
 
-    if failed:
+    if failed and text_only:
+        print("\nSee the Writing style section of .github/copilot-instructions.md.")
+    elif failed:
         print("\nSee templates/README.template.md and the readme-writer skill.")
     return 1 if failed else 0
 

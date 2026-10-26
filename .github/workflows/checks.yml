@@ -26,6 +26,9 @@ jobs:
           test "${#files[@]}" -gt 0 || { echo "no README found"; exit 1; }
           python3 scripts/readme_check.py "${files[@]}"
 
+      - name: Check every markdown file for em dashes and invisible characters
+        run: python3 scripts/readme_check.py --text-only
+
   python:
     name: Python
     runs-on: ubuntu-latest

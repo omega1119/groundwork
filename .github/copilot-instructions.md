@@ -26,7 +26,8 @@ For any build task, all of these, every time:
 3. Every command in the README was **actually executed** in the terminal, and the README
    records what it printed where that is useful. No invented flags, no invented script
    names, no invented package names.
-4. `python3 scripts/readme_check.py` passes.
+4. `python3 scripts/readme_check.py` passes, and so does
+   `python3 scripts/readme_check.py --text-only`, which scans every markdown file.
 5. `.gitignore` covers whatever the run just created (`.venv/`, `__pycache__/`, data,
    secrets, build output).
 6. Secrets live in `.env`, which is git-ignored, and `.env.example` lists the keys with
@@ -36,17 +37,44 @@ Point 3 is the one that gets skipped. A README that documents `pip install -r
 requirements.txt` against a file that does not exist is worse than no README, because the
 reader blames themselves. Grep or run before you write.
 
+## How to build it
+
+Rules for the code itself. Where they come from, and what was left out on purpose, is in
+`docs/decisions/0002-engineering-heuristics.md`.
+
+- **Skeleton first.** Get the thinnest end-to-end path running (entry point, one real input,
+  one real output) before filling anything in. Stub the rest. It runs at every step, not
+  only at the end.
+- **Build what the task needs, the obvious way.** No option, layer, config switch or
+  abstraction for a case nobody asked for. Optimise only after measuring a problem.
+- **Two copies are fine, extract on the third.** The wrong abstraction costs more than a
+  duplicated block.
+- **Fail loudly.** No `except` that returns `None`, no default that hides a missing setting,
+  no retry loop that ends in silence. Put the offending value in the error message.
+- **Delete what your change made dead:** imports, helpers, flags, files. Leave code you did
+  not touch and do not understand, and ask before removing it.
+- **Names say what they do.** Parameters, flags, config keys and public functions get the
+  long name: `wait_until_saved=True`, not `wait=True`. Loop indices can stay short.
+- **The human owns the architecture.** Do not change the stack, data model, public
+  interface or folder layout on your own initiative. Propose it, say why, wait. Once
+  agreed, record it in `docs/decisions/`.
+- **Review against the checklist, not from memory.** Before reporting done, walk the diff
+  through `docs/review-checklist.md`, in a fresh context or a second agent where you can.
+  When a defect gets past it, add a line.
+
 ## Layout
 
 | Path | What it is |
 |---|---|
 | `.github/copilot-instructions.md` | This file. Always loaded. Keep it short. |
+| `AGENTS.md`, `CLAUDE.md` | Pointers to this file for other agent tools. `CLAUDE.md` imports both. |
 | `.github/skills/` | Loadable procedures: bootstrapping a project, writing the README, writing a spec. Third-party skills are vendored here, pinned by `vendored.json`. |
 | `.github/instructions/` | Auto-applied rules, scoped by `applyTo` glob. |
 | `.github/prompts/` | Slash commands: `/new-project`, `/update-readme`, `/write-spec`, `/new-infra`. |
 | `.github/agents/` | Custom agent definitions. |
 | `docs/spec.md` | What is being built and why. Written before the code. |
 | `docs/decisions/` | Short ADRs for choices a future reader would otherwise reverse by accident. |
+| `docs/review-checklist.md` | Questions to put to a diff before calling it done, one per defect that has actually happened. |
 | `templates/` | The README, spec and changelog templates, plus per-stack quickstart blocks. |
 | `scripts/` | Durable tools only. Run throwaway code inline via a heredoc, do not leave one-shot scripts behind. |
 | `TASKS.md` | Working task list with the reasoning, not just the checkboxes. |
@@ -89,7 +117,8 @@ python3 scripts/vendor_skills.py --check
 documentation or UI copy. Use a comma, a colon, a full stop, parentheses, or the
 conjunction the dash was hiding. A blind swap to " - " is worse than the dash. En dashes
 in numeric ranges (`1k–4.9k`) and hyphenated compounds are fine. `readme_check.py` fails
-the build on em dashes, so this is enforced, not advisory.
+the build on em dashes in any markdown file outside the vendored skills, so this is
+enforced, not advisory.
 
 It also fails on invisible characters: zero width spaces, non-breaking spaces, bidi
 controls and Unicode tag characters. These arrive from web paste and from tools that hide
